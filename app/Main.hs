@@ -15,7 +15,8 @@ main = do
 
 loop :: FilePath -> IO ()
 loop filePath = do
-    putStrLn "> "
+    putStr "> "
+    hFlush stdout
     input <- T.getLine
     if input == "exit"
         then putStrLn "Exiting..."
