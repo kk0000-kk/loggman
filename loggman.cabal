@@ -37,6 +37,7 @@ library
       base >=4.7 && <5
     , filepath
     , text
+    , time
   default-language: Haskell2010
 
 executable loggman-exe
@@ -53,6 +54,7 @@ executable loggman-exe
     , filepath
     , loggman
     , text
+    , time
   default-language: Haskell2010
 
 test-suite loggman-test
@@ -70,4 +72,5 @@ test-suite loggman-test
     , filepath
     , loggman
     , text
+    , time
   default-language: Haskell2010
