@@ -25,6 +25,7 @@ dependencies:
   - filepath
   - time
   - process
+  - directory
 
 ghc-options:
   - -Wall

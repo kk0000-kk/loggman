@@ -6,19 +6,28 @@ import Data.Text (Text, append, pack)
 import qualified Data.Text.IO as T
 import System.FilePath (takeExtension)
 import Data.Time (getZonedTime, formatTime, defaultTimeLocale)
+import System.Directory (doesFileExist)
 import System.Process (callCommand)
 
 main :: IO ()
 main = do
     args <- getArgs
     case args of
-        [filePath] -> loop filePath
+        [filePath] -> do
+            fileExists <- doesFileExist filePath
+            if not fileExists
+              then do
+                  -- ファイルが存在しない場合、テンプレートを書き込む
+                  T.writeFile filePath "## TODO\n\n## LOG\n"
+                  putStrLn $ "Template written to " ++ filePath
+            else return ()
+            loop filePath
         _ -> putStrLn "Usage: stack run <file-path>"
 
 loop :: FilePath -> IO ()
 loop filePath = do
     putStrLn "Current file content:"
-    callCommand $ "cat " ++ filePath  -- ファイルの内容を表示
+    callCommand $ "cat " ++ filePath
     putStr "> "
     hFlush stdout  -- これにより、メッセージが即座に表示される
     input <- T.getLine
