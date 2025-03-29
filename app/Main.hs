@@ -37,9 +37,8 @@ loop filePath = do
     else if input == "todo"
         then do
             T.appendFile filePath ("\n")
-            currentTime <- getZonedTime
-            let timeStamp = formatTime defaultTimeLocale "%Y-%m-%d(%a) %H:%M:%S" currentTime
-            T.appendFile filePath (pack timeStamp `append` "\n")
+            timeStamp <- getCurrentTimeStamp
+            T.appendFile filePath (timeStamp `append` "\n")
             T.appendFile filePath ("タスクばらし/start" `append` "\n")
 
             editMode filePath
@@ -47,9 +46,8 @@ loop filePath = do
         then loop filePath
     else do
         T.appendFile filePath ("\n")
-        currentTime <- getZonedTime
-        let timeStamp = formatTime defaultTimeLocale "%Y-%m-%d(%a) %H:%M:%S" currentTime
-        T.appendFile filePath (pack timeStamp `append` "\n")
+        timeStamp <- getCurrentTimeStamp
+        T.appendFile filePath (timeStamp `append` "\n")
         T.appendFile filePath (input `append` "\n")
         putStrLn $ "Text has been written to " ++ filePath
         loop filePath
@@ -60,8 +58,13 @@ editMode filePath = do
     _ <- system $ "vi " ++ filePath
     putStrLn "Exited edit mode."
     T.appendFile filePath ("\n")
-    currentTime <- getZonedTime
-    let timeStamp = formatTime defaultTimeLocale "%Y-%m-%d(%a) %H:%M:%S" currentTime
-    T.appendFile filePath (pack timeStamp `append` "\n")
+    timeStamp <- getCurrentTimeStamp
+    T.appendFile filePath (timeStamp `append` "\n")
     T.appendFile filePath ("タスクばらし/stop" `append` "\n")
     loop filePath
+
+getCurrentTimeStamp :: IO Text
+getCurrentTimeStamp = do
+    currentTime <- getZonedTime
+    let timeStamp = formatTime defaultTimeLocale "%Y-%m-%d(%a) %H:%M:%S" currentTime
+    return $ pack timeStamp
