@@ -6,6 +6,7 @@ import Data.Text (Text, append, pack)
 import qualified Data.Text.IO as T
 import System.FilePath (takeExtension)
 import Data.Time (getZonedTime, formatTime, defaultTimeLocale)
+import System.Process (callCommand)
 
 main :: IO ()
 main = do
@@ -16,16 +17,20 @@ main = do
 
 loop :: FilePath -> IO ()
 loop filePath = do
+    putStrLn "Current file content:"
+    callCommand $ "cat " ++ filePath  -- ファイルの内容を表示
     putStr "> "
-    hFlush stdout
+    hFlush stdout  -- これにより、メッセージが即座に表示される
     input <- T.getLine
     if input == "exit"
         then putStrLn "Exiting..."
-        else do
-            T.appendFile filePath ("\n")
-            currentTime <- getZonedTime
-            let timeStamp = formatTime defaultTimeLocale "%Y-%m-%d(%a) %H:%M:%S" currentTime
-            T.appendFile filePath (pack timeStamp `append` "\n")
-            T.appendFile filePath (input `append` "\n")
-            putStrLn $ "Text has been written to " ++ filePath
-            loop filePath
+    else if input == ""
+        then loop filePath
+    else do
+        T.appendFile filePath ("\n")
+        currentTime <- getZonedTime
+        let timeStamp = formatTime defaultTimeLocale "%Y-%m-%d(%a) %H:%M:%S" currentTime
+        T.appendFile filePath (pack timeStamp `append` "\n")
+        T.appendFile filePath (input `append` "\n")
+        putStrLn $ "Text has been written to " ++ filePath
+        loop filePath
