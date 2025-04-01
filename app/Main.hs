@@ -29,11 +29,17 @@ loop filePath = do
     putStrLn "\n====================="
     putStrLn "Current file content:\n"
     callCommand $ "cat " ++ filePath
+    putStrLn ""
     putStr "> "
     hFlush stdout  -- これにより、メッセージが即座に表示される
     input <- T.getLine
     if input == "exit"
-        then putStrLn "Exiting..."
+        then do
+            T.appendFile filePath ("\n")
+            timeStamp <- getCurrentTimeStamp
+            T.appendFile filePath (timeStamp `append` "\n")
+            T.appendFile filePath ("exit" `append` "\n")
+            putStrLn "Exiting..."
     else if input == "todo"
         then do
             T.appendFile filePath ("\n")
