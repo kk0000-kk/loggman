@@ -70,3 +70,19 @@ hogehoge
 タスクばらし/stop
 >
 ```
+
+### done todo
+
+```
+> done fuga
+```
+
+- Check off TODO items that match the beginning of the input text
+
+### exit
+
+```
+> exit
+```
+
+- Exit and the exit timestamp will be recorded
