@@ -42,7 +42,7 @@ library
     , time
   default-language: Haskell2010
 
-executable loggman-exe
+executable loggman
   main-is: Main.hs
   other-modules:
       Paths_loggman

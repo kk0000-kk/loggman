@@ -42,7 +42,7 @@ library:
   source-dirs: src
 
 executables:
-  loggman-exe:
+  loggman:
     main: Main.hs
     source-dirs: app
     ghc-options:
