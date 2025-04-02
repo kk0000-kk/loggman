@@ -26,6 +26,7 @@ dependencies:
   - time
   - process
   - directory
+  - haskeline
 
 ghc-options:
   - -Wall
