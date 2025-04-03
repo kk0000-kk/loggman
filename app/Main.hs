@@ -36,7 +36,13 @@ loop filePath = do
     input <- getInputLine "> "
     case input of
         Nothing -> return ()
-        Just "exit" -> outputStrLn "Exiting..."
+        Just "exit" -> do
+            liftIO $ do
+                T.appendFile filePath ("\n")
+                timeStamp <- getCurrentTimeStamp
+                T.appendFile filePath (timeStamp `append` "\n")
+                T.appendFile filePath ("exit" `append` "\n")
+            outputStrLn "Exiting..."
         Just "todo" -> do
             liftIO $ do
                 T.appendFile filePath ("\n")
