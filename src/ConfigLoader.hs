@@ -14,6 +14,7 @@ import Data.HashMap.Strict (HashMap)
 
 data TogglConfig = TogglConfig
   { apiKey :: Text
+  , workspaceId :: Text
   , projectIds :: HashMap Text Text
   } deriving (Show, Generic)
 

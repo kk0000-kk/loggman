@@ -18,6 +18,7 @@ defaultConfig :: Config
 defaultConfig = Config
     { toggl = TogglConfig
         { apiKey = "dummy"
+        , workspaceId = "dummy"
         , projectIds = HM.fromList [("dummy-project", "dummy-id")]
         }
     }
@@ -35,7 +36,7 @@ main = do
                     putStrLn $ "If you need, please write the configuration in ~/.loggman/config.yaml." ++ show err
                     return defaultConfig
                 Right cfg -> do
-                    putStrLn $ "Configuration file loaded."
+                    putStrLn $ "Configuration file loaded!"
                     return cfg
 
     case args of
