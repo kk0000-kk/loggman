@@ -5,24 +5,47 @@ import System.Environment
 import Data.Text (Text, append, pack, replace, isPrefixOf, lines, stripPrefix)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
+import qualified Data.HashMap.Strict as HM
 import System.FilePath (takeExtension)
 import Data.Time (getZonedTime, formatTime, defaultTimeLocale)
-import System.Directory (doesFileExist)
+import System.Directory (doesFileExist, getHomeDirectory)
 import System.Process (callCommand, system)
 import System.Console.Haskeline
 import Control.Monad.IO.Class (liftIO)
+import ConfigLoader
+
+defaultConfig :: Config
+defaultConfig = Config
+    { toggl = TogglConfig
+        { apiKey = "dummy"
+        , projectIds = HM.fromList [("dummy-project", "dummy-id")]
+        }
+    }
 
 main :: IO ()
 main = do
     args <- getArgs
+    homeDir <- getHomeDirectory
+    let configDir = homeDir ++ "/.loggman"
+    let configPath = configDir ++ "/config.yaml"
+
+    configResult <- loadConfig configPath
+    config <- case configResult of
+                Left err -> do
+                    putStrLn $ "If you need, please write the configuration in ~/.loggman/config.yaml." ++ show err
+                    return defaultConfig
+                Right cfg -> do
+                    putStrLn $ "Configuration file loaded."
+                    return cfg
+
     case args of
         [filePath] -> do
             fileExists <- doesFileExist filePath
             if not fileExists
-              then do
-                  -- ファイルが存在しない場合、テンプレートを書き込む
-                  T.writeFile filePath "## TODO\n\n## LOG\n"
-                  putStrLn $ "Template written to " ++ filePath
+                then do
+                    -- ファイルが存在しない場合、テンプレートを書き込む
+                    T.writeFile filePath "## TODO\n\n## LOG\n"
+                    putStrLn $ "Template written to " ++ filePath
             else return ()
             runInputT defaultSettings (loop filePath)
         _ -> putStrLn "Usage: stack run <file-path>"

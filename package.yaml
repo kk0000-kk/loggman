@@ -27,6 +27,8 @@ dependencies:
   - process
   - directory
   - haskeline
+  - yaml
+  - unordered-containers
 
 ghc-options:
   - -Wall
