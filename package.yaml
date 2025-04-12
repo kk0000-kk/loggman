@@ -29,6 +29,10 @@ dependencies:
   - haskeline
   - yaml
   - unordered-containers
+  - req
+  - aeson
+  - hashable
+  - bytestring
 
 ghc-options:
   - -Wall

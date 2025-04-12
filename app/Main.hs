@@ -2,7 +2,7 @@
 
 import System.IO
 import System.Environment
-import Data.Text (Text, append, pack, replace, isPrefixOf, lines, stripPrefix)
+import Data.Text (Text, append, pack, replace, isPrefixOf, lines, stripPrefix, unpack)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.HashMap.Strict as HM
@@ -13,6 +13,7 @@ import System.Process (callCommand, system)
 import System.Console.Haskeline
 import Control.Monad.IO.Class (liftIO)
 import ConfigLoader
+-- import TogglRequest (startTimeEntry)
 
 defaultConfig :: Config
 defaultConfig = Config
@@ -48,11 +49,11 @@ main = do
                     T.writeFile filePath "## TODO\n\n## LOG\n"
                     putStrLn $ "Template written to " ++ filePath
             else return ()
-            runInputT defaultSettings (loop filePath)
+            runInputT defaultSettings (loop filePath config)
         _ -> putStrLn "Usage: stack run <file-path>"
 
-loop :: FilePath -> InputT IO ()
-loop filePath = do
+loop :: FilePath -> Config -> InputT IO ()
+loop filePath config = do
     outputStrLn "\n====================="
     outputStrLn "Current file content:\n"
     liftIO $ callCommand $ "cat " ++ filePath
@@ -74,12 +75,16 @@ loop filePath = do
                 T.appendFile filePath (timeStamp `append` "\n")
                 T.appendFile filePath ("タスクばらし/start" `append` "\n")
             liftIO $ editMode filePath
-            loop filePath
+            loop filePath config
         Just inputText | "done" `isPrefixOf` pack inputText -> do
             let prefix = T.drop 5 (pack inputText)  -- "done "の後の部分を取得
             liftIO $ markTodoAsDone filePath prefix
-            loop filePath
-        Just "" -> loop filePath
+            loop filePath config
+        Just inputText | "start" `isPrefixOf` pack inputText -> do
+            let projectName = T.drop 6 (pack inputText)
+            liftIO $ handleStartCommand config projectName
+            loop filePath config
+        Just "" -> loop filePath config
         Just inputText -> do
             liftIO $ do
                 T.appendFile filePath ("\n")
@@ -87,7 +92,7 @@ loop filePath = do
                 T.appendFile filePath (timeStamp `append` "\n")
                 T.appendFile filePath (pack inputText `append` "\n")
                 putStrLn $ "Text has been written to " ++ filePath
-            loop filePath
+            loop filePath config
 
 editMode :: FilePath -> IO ()
 editMode filePath = do
@@ -122,3 +127,12 @@ getCurrentTimeStamp = do
     currentTime <- getZonedTime
     let timeStamp = formatTime defaultTimeLocale "%Y-%m-%d(%a) %H:%M:%S" currentTime
     return $ pack timeStamp
+
+handleStartCommand :: Config -> Text -> IO ()
+handleStartCommand config projectName = do
+    let togglConfig = toggl config
+    case HM.lookup projectName (projectIds togglConfig) of
+        Nothing -> putStrLn $ "Project " ++ unpack projectName ++ " not found in config."
+        Just projectId -> do
+            putStrLn $ "Starting Toggl timer for project: " ++ unpack projectName
+            -- startTimeEntry (apiKey togglConfig) (workspaceId togglConfig) (unpack projectId)
