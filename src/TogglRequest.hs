@@ -4,6 +4,7 @@
 module TogglRequest
   ( startTimeEntry
   , getCurrentTimeEntryId
+  , stopTimeEntry
   ) where
 
 import Network.HTTP.Req
@@ -55,3 +56,10 @@ getCurrentTimeEntryId apiKey = runReq defaultHttpConfig $ do
     response <- req GET endpoint NoReqBody jsonResponse authHeader :: Req (JsonResponse Value)
     let responseBodyValue = responseBody response
     return $ parseMaybe (withObject "current time entry" (\obj -> obj .: "id")) responseBodyValue
+
+stopTimeEntry :: Text -> Text -> Integer -> IO ()
+stopTimeEntry apiKey workspaceId timeEntryId = runReq defaultHttpConfig $ do
+    let endpoint = https "api.track.toggl.com" /: "api" /: "v9" /: "workspaces" /: workspaceId /: "time_entries" /: pack (show timeEntryId) /: "stop"
+        authHeader = basicAuth (BS.pack $ unpack apiKey) "api_token"
+    response <- req PATCH endpoint NoReqBody jsonResponse authHeader :: Req (JsonResponse Value)
+    liftIO $ BL.putStrLn (encode $ responseBody response)

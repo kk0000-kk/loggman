@@ -13,7 +13,7 @@ import System.Process (callCommand, system)
 import System.Console.Haskeline
 import Control.Monad.IO.Class (liftIO)
 import ConfigLoader
-import TogglRequest (startTimeEntry, getCurrentTimeEntryId)
+import TogglRequest (startTimeEntry, getCurrentTimeEntryId, stopTimeEntry)
 
 defaultConfig :: Config
 defaultConfig = Config
@@ -67,8 +67,11 @@ loop filePath config = do
                 timeStamp <- getCurrentTimeStamp
                 T.appendFile filePath (timeStamp `append` "\n")
                 T.appendFile filePath ("exit" `append` "\n")
-                currentEntryId <- getCurrentTimeEntryId (apiKey $ toggl config)
-                print currentEntryId
+                let togglConfig = toggl config
+                currentEntryId <- getCurrentTimeEntryId (apiKey togglConfig)
+                case currentEntryId of
+                    Nothing -> putStrLn "No active Toggl entry to stop."
+                    Just entryId -> stopTimeEntry (apiKey togglConfig) (workspaceId togglConfig) entryId
             outputStrLn "Exiting..."
         Just "todo" -> do
             liftIO $ do
