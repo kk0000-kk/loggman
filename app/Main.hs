@@ -13,7 +13,7 @@ import System.Process (callCommand, system)
 import System.Console.Haskeline
 import Control.Monad.IO.Class (liftIO)
 import ConfigLoader
--- import TogglRequest (startTimeEntry)
+import TogglRequest (startTimeEntry)
 
 defaultConfig :: Config
 defaultConfig = Config
@@ -135,4 +135,4 @@ handleStartCommand config projectName = do
         Nothing -> putStrLn $ "Project " ++ unpack projectName ++ " not found in config."
         Just projectId -> do
             putStrLn $ "Starting Toggl timer for project: " ++ unpack projectName
-            -- startTimeEntry (apiKey togglConfig) (workspaceId togglConfig) (unpack projectId)
+            startTimeEntry (apiKey togglConfig) (workspaceId togglConfig) projectId
