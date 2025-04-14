@@ -79,10 +79,28 @@ hogehoge
 
 - Check off TODO items that match the beginning of the input text
 
+### start toggl
+
+```
+> start hoge
+```
+
+- Preparation
+- Place the configuration file (`config.yaml`) in `~/.loggman/`.
+
+```
+toggl:
+  apiKey: 'apikey'
+  workspaceId: '123456'
+  projectIds:
+    hoge: '1111'
+    fuga: '2222'
+```
+
 ### exit
 
 ```
 > exit
 ```
 
-- Exit and the exit timestamp will be recorded
+- Exit and the exit timestamp will be recorded. If there is an active time entry in Toggl, it will be stopped.
