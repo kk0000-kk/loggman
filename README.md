@@ -86,7 +86,7 @@ hogehoge
 ```
 
 - Preparation
-- Place the configuration file (`config.yaml`) in `~/.loggman/`.
+  - Place the configuration file (`config.yaml`) in `~/.loggman/`.
 
 ```
 toggl:
