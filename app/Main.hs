@@ -2,7 +2,7 @@
 
 import System.IO
 import System.Environment
-import Data.Text (Text, append, pack, replace, isPrefixOf, lines, stripPrefix, unpack)
+import Data.Text (Text, append, pack, replace, isPrefixOf, stripPrefix, unpack)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.HashMap.Strict as HM
@@ -13,7 +13,7 @@ import System.Process (callCommand, system)
 import System.Console.Haskeline
 import Control.Monad.IO.Class (liftIO)
 import ConfigLoader
-import TogglRequest (startTimeEntry, getCurrentTimeEntry)
+import TogglRequest (startTimeEntry, getCurrentTimeEntryId)
 
 defaultConfig :: Config
 defaultConfig = Config
@@ -67,7 +67,8 @@ loop filePath config = do
                 timeStamp <- getCurrentTimeStamp
                 T.appendFile filePath (timeStamp `append` "\n")
                 T.appendFile filePath ("exit" `append` "\n")
-                getCurrentTimeEntry (apiKey $ toggl config)
+                currentEntryId <- getCurrentTimeEntryId (apiKey $ toggl config)
+                print currentEntryId
             outputStrLn "Exiting..."
         Just "todo" -> do
             liftIO $ do

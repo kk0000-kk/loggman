@@ -3,12 +3,13 @@
 
 module TogglRequest
   ( startTimeEntry
-  , getCurrentTimeEntry
+  , getCurrentTimeEntryId
   ) where
 
 import Network.HTTP.Req
 import Data.Text (Text, unpack, pack)
-import Data.Aeson (ToJSON, encode, Value)
+import Data.Aeson (ToJSON, encode, Value, (.:), withObject)
+import Data.Aeson.Types (parseMaybe)
 import Data.Time (getCurrentTime, formatTime, defaultTimeLocale)
 import Control.Monad.IO.Class (liftIO)
 import Data.String (fromString)
@@ -47,9 +48,10 @@ startTimeEntry apiKey workspaceId projectId = runReq defaultHttpConfig $ do
     response <- req POST endpoint (ReqBodyLbs $ encode togglData) jsonResponse authHeader :: Req (JsonResponse Value)
     liftIO $ BL.putStrLn (encode $ responseBody response)
 
-getCurrentTimeEntry :: Text -> IO ()
-getCurrentTimeEntry apiKey = runReq defaultHttpConfig $ do
+getCurrentTimeEntryId :: Text -> IO (Maybe Integer)
+getCurrentTimeEntryId apiKey = runReq defaultHttpConfig $ do
     let endpoint = https "api.track.toggl.com" /: "api" /: "v9" /: "me" /: "time_entries" /: "current"
         authHeader = basicAuth (BS.pack $ unpack apiKey) "api_token"
     response <- req GET endpoint NoReqBody jsonResponse authHeader :: Req (JsonResponse Value)
-    liftIO $ BL.putStrLn (encode $ responseBody response)
+    let responseBodyValue = responseBody response
+    return $ parseMaybe (withObject "current time entry" (\obj -> obj .: "id")) responseBodyValue
