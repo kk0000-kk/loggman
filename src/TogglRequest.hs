@@ -3,6 +3,7 @@
 
 module TogglRequest
   ( startTimeEntry
+  , getCurrentTimeEntry
   ) where
 
 import Network.HTTP.Req
@@ -44,4 +45,11 @@ startTimeEntry apiKey workspaceId projectId = runReq defaultHttpConfig $ do
     let endpoint = https "api.track.toggl.com" /: "api" /: "v9" /: "workspaces" /: workspaceId /: "time_entries"
         authHeader = basicAuth (BS.pack $ unpack apiKey) "api_token"
     response <- req POST endpoint (ReqBodyLbs $ encode togglData) jsonResponse authHeader :: Req (JsonResponse Value)
+    liftIO $ BL.putStrLn (encode $ responseBody response)
+
+getCurrentTimeEntry :: Text -> IO ()
+getCurrentTimeEntry apiKey = runReq defaultHttpConfig $ do
+    let endpoint = https "api.track.toggl.com" /: "api" /: "v9" /: "me" /: "time_entries" /: "current"
+        authHeader = basicAuth (BS.pack $ unpack apiKey) "api_token"
+    response <- req GET endpoint NoReqBody jsonResponse authHeader :: Req (JsonResponse Value)
     liftIO $ BL.putStrLn (encode $ responseBody response)

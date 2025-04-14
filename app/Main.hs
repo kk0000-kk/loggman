@@ -13,7 +13,7 @@ import System.Process (callCommand, system)
 import System.Console.Haskeline
 import Control.Monad.IO.Class (liftIO)
 import ConfigLoader
-import TogglRequest (startTimeEntry)
+import TogglRequest (startTimeEntry, getCurrentTimeEntry)
 
 defaultConfig :: Config
 defaultConfig = Config
@@ -67,6 +67,7 @@ loop filePath config = do
                 timeStamp <- getCurrentTimeStamp
                 T.appendFile filePath (timeStamp `append` "\n")
                 T.appendFile filePath ("exit" `append` "\n")
+                getCurrentTimeEntry (apiKey $ toggl config)
             outputStrLn "Exiting..."
         Just "todo" -> do
             liftIO $ do
