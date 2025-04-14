@@ -1,7 +1,7 @@
 name: loggman
 version: 0.1.0.0
 github: 'kk0000-kk/loggman'
-license: BSD-3-Clause
+license: MIT
 author: 'kk0000-kk'
 maintainer: 'kazuyoshi.kobayashi.1@gmail.com'
 copyright: '2025 kk0000-kk'
