@@ -1,4 +1,4 @@
-cabal-version: 2.2
+cabal-version: 1.12
 
 -- This file has been generated from package.yaml by hpack version 0.37.0.
 --
@@ -12,7 +12,7 @@ bug-reports:    https://github.com/kk0000-kk/loggman/issues
 author:         kk0000-kk
 maintainer:     kazuyoshi.kobayashi.1@gmail.com
 copyright:      2025 kk0000-kk
-license:        BSD-3-Clause
+license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -28,8 +28,6 @@ library
       ConfigLoader
       TogglRequest
   other-modules:
-      Paths_loggman
-  autogen-modules:
       Paths_loggman
   hs-source-dirs:
       src
@@ -53,8 +51,6 @@ library
 executable loggman
   main-is: Main.hs
   other-modules:
-      Paths_loggman
-  autogen-modules:
       Paths_loggman
   hs-source-dirs:
       app
@@ -80,8 +76,6 @@ test-suite loggman-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_loggman
-  autogen-modules:
       Paths_loggman
   hs-source-dirs:
       test

@@ -1,12 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import System.IO
 import System.Environment
 import Data.Text (Text, append, pack, replace, isPrefixOf, stripPrefix, unpack)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Data.HashMap.Strict as HM
-import System.FilePath (takeExtension)
 import Data.Time (getZonedTime, formatTime, defaultTimeLocale)
 import System.Directory (doesFileExist, getHomeDirectory)
 import System.Process (callCommand, system)
@@ -63,7 +61,7 @@ loop filePath config = do
         Nothing -> return ()
         Just "exit" -> do
             liftIO $ do
-                T.appendFile filePath ("\n")
+                T.appendFile filePath "\n"
                 timeStamp <- getCurrentTimeStamp
                 T.appendFile filePath (timeStamp `append` "\n")
                 T.appendFile filePath ("exit" `append` "\n")
@@ -75,7 +73,7 @@ loop filePath config = do
             outputStrLn "Exiting..."
         Just "todo" -> do
             liftIO $ do
-                T.appendFile filePath ("\n")
+                T.appendFile filePath "\n"
                 timeStamp <- getCurrentTimeStamp
                 T.appendFile filePath (timeStamp `append` "\n")
                 T.appendFile filePath ("タスクばらし/start" `append` "\n")
@@ -87,12 +85,12 @@ loop filePath config = do
             loop filePath config
         Just inputText | "start" `isPrefixOf` pack inputText -> do
             let projectName = T.drop 6 (pack inputText)
-            liftIO $ handleStartCommand config projectName
+            liftIO $ handleStartCommand filePath config projectName
             loop filePath config
         Just "" -> loop filePath config
         Just inputText -> do
             liftIO $ do
-                T.appendFile filePath ("\n")
+                T.appendFile filePath "\n"
                 timeStamp <- getCurrentTimeStamp
                 T.appendFile filePath (timeStamp `append` "\n")
                 T.appendFile filePath (pack inputText `append` "\n")
@@ -104,7 +102,7 @@ editMode filePath = do
     putStrLn "Entered edit mode. Opening vi editor..."
     _ <- system $ "vi " ++ filePath
     putStrLn "Exited edit mode."
-    T.appendFile filePath ("\n")
+    T.appendFile filePath "\n"
     timeStamp <- getCurrentTimeStamp
     T.appendFile filePath (timeStamp `append` "\n")
     T.appendFile filePath ("タスクばらし/stop" `append` "\n")
@@ -114,7 +112,7 @@ markTodoAsDone filePath prefix = do
     content <- T.readFile filePath
     let updatedContent = T.unlines $ map (markIfPrefix prefix) (T.lines content)
     T.writeFile filePath updatedContent
-    T.appendFile filePath ("\n")
+    T.appendFile filePath "\n"
     timeStamp <- getCurrentTimeStamp
     T.appendFile filePath (timeStamp `append` "\n")
     T.appendFile filePath (prefix `append` "/done\n")
@@ -133,11 +131,15 @@ getCurrentTimeStamp = do
     let timeStamp = formatTime defaultTimeLocale "%Y-%m-%d(%a) %H:%M:%S" currentTime
     return $ pack timeStamp
 
-handleStartCommand :: Config -> Text -> IO ()
-handleStartCommand config projectName = do
+handleStartCommand :: FilePath -> Config -> Text -> IO ()
+handleStartCommand filePath config projectName = do
     let togglConfig = toggl config
     case HM.lookup projectName (projectIds togglConfig) of
         Nothing -> putStrLn $ "Project " ++ unpack projectName ++ " not found in config."
         Just projectId -> do
             putStrLn $ "Starting Toggl timer for project: " ++ unpack projectName
             startTimeEntry (apiKey togglConfig) (workspaceId togglConfig) projectId
+            T.appendFile filePath "\n"
+            timeStamp <- getCurrentTimeStamp
+            T.appendFile filePath (timeStamp `append` "\n")
+            T.appendFile filePath (projectName `append` "/start\n")
