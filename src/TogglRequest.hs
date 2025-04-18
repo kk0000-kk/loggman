@@ -13,7 +13,6 @@ import Data.Aeson (ToJSON, encode, Value, (.:), withObject)
 import Data.Aeson.Types (parseMaybe)
 import Data.Time (getCurrentTime, formatTime, defaultTimeLocale)
 import Control.Monad.IO.Class (liftIO)
-import Data.String (fromString)
 import qualified Data.ByteString.Lazy.Char8 as BL
 import qualified Data.ByteString.Char8 as BS
 import GHC.Generics (Generic)
@@ -30,18 +29,18 @@ data TogglRequest = TogglRequest
 
 instance ToJSON TogglRequest
 
-startTimeEntry :: Text -> Text -> Text -> IO ()
-startTimeEntry apiKey workspaceId projectId = runReq defaultHttpConfig $ do
+startTimeEntry :: Text -> Text -> Text -> Text -> IO ()
+startTimeEntry apiKey workspaceId projectId desc = runReq defaultHttpConfig $ do
     currentTime <- liftIO getCurrentTime
     let isoTime = pack $ formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ" currentTime
         togglData = TogglRequest
-          { description = ""
+          { description = desc
             , project_id = read (unpack projectId) :: Integer
-          , created_with = "loggman"
-          , duration = -1
-          , workspace_id = read (unpack workspaceId) :: Integer
-          , start = isoTime
-          , stop = Nothing
+            , created_with = "loggman"
+            , duration = -1
+            , workspace_id = read (unpack workspaceId) :: Integer
+            , start = isoTime
+            , stop = Nothing
           }
 
     let endpoint = https "api.track.toggl.com" /: "api" /: "v9" /: "workspaces" /: workspaceId /: "time_entries"

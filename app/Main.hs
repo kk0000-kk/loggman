@@ -84,8 +84,11 @@ loop filePath config = do
             liftIO $ markTodoAsDone filePath prefix
             loop filePath config
         Just inputText | "start" `isPrefixOf` pack inputText -> do
-            let projectName = T.drop 6 (pack inputText)
-            liftIO $ handleStartCommand filePath config projectName
+            let (projectName, description) =
+                    case T.splitOn " " (T.drop 6 (pack inputText)) of
+                        (p:ds) -> (p, T.unwords ds)
+                        _ -> ("", "")
+            liftIO $ handleStartCommand filePath config projectName description
             loop filePath config
         Just "stop" -> do
             liftIO $ do
@@ -143,15 +146,15 @@ getCurrentTimeStamp = do
     let timeStamp = formatTime defaultTimeLocale "%Y-%m-%d(%a) %H:%M:%S" currentTime
     return $ pack timeStamp
 
-handleStartCommand :: FilePath -> Config -> Text -> IO ()
-handleStartCommand filePath config projectName = do
+handleStartCommand :: FilePath -> Config -> Text -> Text -> IO ()
+handleStartCommand filePath config projectName description = do
     let togglConfig = toggl config
     case HM.lookup projectName (projectIds togglConfig) of
         Nothing -> putStrLn $ "Project " ++ unpack projectName ++ " not found in config."
         Just projectId -> do
             putStrLn $ "Starting Toggl timer for project: " ++ unpack projectName
-            startTimeEntry (apiKey togglConfig) (workspaceId togglConfig) projectId
+            startTimeEntry (apiKey togglConfig) (workspaceId togglConfig) projectId description
             T.appendFile filePath "\n"
             timeStamp <- getCurrentTimeStamp
             T.appendFile filePath (timeStamp `append` "\n")
-            T.appendFile filePath (projectName `append` "/start\n")
+            T.appendFile filePath (projectName `append` "/" `append` description `append` "/start\n")
