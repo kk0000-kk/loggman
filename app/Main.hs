@@ -35,7 +35,7 @@ main = do
                     putStrLn $ "If you need, please write the configuration in ~/.loggman/config.yaml." ++ show err
                     return defaultConfig
                 Right cfg -> do
-                    putStrLn $ "Configuration file loaded!"
+                    putStrLn "Configuration file loaded!"
                     return cfg
 
     case args of
@@ -86,6 +86,18 @@ loop filePath config = do
         Just inputText | "start" `isPrefixOf` pack inputText -> do
             let projectName = T.drop 6 (pack inputText)
             liftIO $ handleStartCommand filePath config projectName
+            loop filePath config
+        Just "stop" -> do
+            liftIO $ do
+                let togglConfig = toggl config
+                currentEntryId <- getCurrentTimeEntryId (apiKey togglConfig)
+                case currentEntryId of
+                    Nothing -> putStrLn "No active Toggl entry to stop."
+                    Just entryId -> stopTimeEntry (apiKey togglConfig) (workspaceId togglConfig) entryId
+                T.appendFile filePath "\n"
+                timeStamp <- getCurrentTimeStamp
+                T.appendFile filePath (timeStamp `append` "\n")
+                T.appendFile filePath "stop\n"
             loop filePath config
         Just "" -> loop filePath config
         Just inputText -> do
